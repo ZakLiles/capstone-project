@@ -2,7 +2,7 @@ const express = require('express')
 
 const app = express()
 require('dotenv').config()
-const {SERVER_PORT} = process.env || 3000
+const {SERVER_PORT} = process.env.PORT || 3000
 
 const {getHTML, getStyles, getScript} = require('./controller.js')
 
