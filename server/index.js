@@ -1,15 +1,15 @@
 const express = require('express')
-const path = require('path')
 
 const app = express()
-const port = process.env.PORT || 3000
+require('dotenv').config()
+const {SERVER_PORT} = process.env || 3000
+
+const {getHTML, getStyles, getScript} = require('./controller.js')
 
 app.use(express.json())
 
-app.get('/', (req,res) => {
-    res.sendFile(path.join(__dirname, '../public/index.html'))
-})
+app.get('/', getHTML)
+app.get('/styles', getStyles)
+app.get('/js', getScript)
 
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`)
-  })
+app.listen(SERVER_PORT, () => console.log(`Listening on port ${SERVER_PORT}`))
