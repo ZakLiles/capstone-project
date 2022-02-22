@@ -1,6 +1,6 @@
 const path = require('path')
 require('dotenv').config()
-const {CONNECTION_STRING} = process.env
+const CONNECTION_STRING = process.env.DATABASE_URL || process.env.CONNECTION_STRING
 const Sequelize = require('sequelize');
 
 const sequelize = new Sequelize(CONNECTION_STRING, {
