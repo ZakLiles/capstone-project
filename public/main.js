@@ -1,7 +1,8 @@
 const addIncomeBtn = document.getElementById("add-income-btn");
 const addExpenseBtn = document.getElementById("add-expense-btn");
 
-const budgetTable = document.getElementById("budget-table")
+const incomeTable = document.getElementById("income-table")
+const expenseTable = document.getElementById("expense-table")
 
 const incomeFormCont = document.getElementById("income-form-cont");
 const incomeForm = document.getElementById("income-form");
@@ -18,44 +19,54 @@ const blurBackground = () => mask.style.display = "block"
 const unBlurBackground = () => mask.style.display = "none"
 
 
-const transactionCallback = ({data: transactions}) => showTransactions(transactions)
+const incomeCallback = ({data: income}) => showIncome(income)
+const expensesCallback = ({data: expenses}) => showExpenses(expenses)
 const errCallback = err => console.log(err)
 
 const getTransactions = () => {
-    axios.get(`/transactions`).then(transactionCallback)
+    getIncome()
+    getExpenses()
 }
 
-const showTransactions = transactions => {
-    for(i = budgetTable.rows.length-1; i > 0; i--){
-        budgetTable.deleteRow(i)
+const getIncome = () => {
+    axios.get(`/income`).then(incomeCallback)
+}
+
+const getExpenses = () => {
+    axios.get('/expenses').then(expensesCallback)
+}
+
+const showIncome = incomeArr => {
+    for(i = incomeTable.rows.length-1; i > 1; i--){
+        incomeTable.deleteRow(i)
     }
 
-    let incomes = transactions.filter(trans => trans.type==="Income")
-    let expenses = transactions.filter(trans => trans.type==="Expense")
-
-    let incomeHeader = budgetTable.insertRow(-1)
-    let incomeTitle = incomeHeader.insertCell(0)
-    incomeTitle.innerHTML ="Income"
-    incomeTitle.colSpan = 2
-
-    for(i = 0; i < incomes.length; i++){
-            let newRow = budgetTable.insertRow(-1)
+    for(i = 0; i < incomeArr.length; i++){
+            let newRow = incomeTable.insertRow(-1)
             let descCell = newRow.insertCell(0)
             let amountCell = newRow.insertCell(1)
-            descCell.innerHTML = incomes[i].description
-            amountCell.innerHTML = incomes[i].amount
+            let actionCell = newRow.insertCell(2)
+            let id = incomeArr[i].income_id
+            descCell.innerHTML = incomeArr[i].description
+            amountCell.innerHTML = incomeArr[i].amount
+            actionCell.innerHTML = `<button onclick="deleteIncome(${id})">Delete</button>`
+    }
+}
+
+const showExpenses = expensesArr => {
+    for(i = expenseTable.rows.length-1; i > 1; i--){
+        expenseTable.deleteRow(i)
     }
 
-    let expenseHeader = budgetTable.insertRow(-1)
-    let expenseTitle = expenseHeader.insertCell(0)
-    expenseTitle.innerHTML ="Expenses"
-    expenseTitle.colSpan = 2
-    for(i = 0; i < expenses.length; i++){
-        let newRow = budgetTable.insertRow(-1)
+    for(i = 0; i < expensesArr.length; i++){
+        let newRow = expenseTable.insertRow(-1)
         let descCell = newRow.insertCell(0)
         let amountCell = newRow.insertCell(1)
-        descCell.innerHTML = expenses[i].description
-        amountCell.innerHTML = expenses[i].amount
+        let actionCell = newRow.insertCell(2)
+        let id = expensesArr[i].expense_id
+        descCell.innerHTML = expensesArr[i].description
+        amountCell.innerHTML = expensesArr[i].amount
+        actionCell.innerHTML = `<button onclick="deleteExpense(${id})">Delete</button>`
     }
 }
 
@@ -68,6 +79,7 @@ const showExpenseForm = () => {
     expenseFormCont.style.display = "block";
     blurBackground()
 }
+
 const addIncome = (event) => {
     event.preventDefault()
     let desc = document.getElementById('income-desc').value
@@ -77,7 +89,9 @@ const addIncome = (event) => {
         desc: desc,
         amount: amount
     }
+
     console.log("addIncome")
+    axios.post('/income', incomeObj).then(()=> getIncome())
     incomeFormCont.style.display = "none";
     unBlurBackground()
 }
@@ -96,16 +110,9 @@ const addExpense = (event) => {
         desc: desc.value,
         amount: amount.value
     }
-    let newRow = budgetTable.insertRow(-1)
-    let descCell = newRow.insertCell(0)
-    let amountCell = newRow.insertCell(1)
-
-    descCell.innerHTML = desc.value
-    amountCell.innerHTML = amount.value
 
     console.log("addExpense")
-    desc.value = ''
-    amount.value = ''
+    axios.post('/expenses', expenseObj).then(()=> getExpenses())
     expenseFormCont.style.display = "none";
     unBlurBackground()
 }
@@ -113,6 +120,16 @@ const addExpense = (event) => {
 const cancelExpense = (event) => {
     expenseFormCont.style.display = "none";
     unBlurBackground()
+}
+
+const deleteIncome = id => {
+    console.log('deleteIncome', id)
+    axios.delete(`/income/${id}`).then(() => getIncome())
+}
+
+const deleteExpense = id => {
+    console.log('deleteExpense', id)
+    axios.delete(`/expense/${id}`).then(() => getExpenses())
 }
 
 addIncomeBtn.addEventListener('click', showIncomeForm)

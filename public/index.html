@@ -12,22 +12,42 @@
         <header >
             <h1>Budgeting App</h1>
         </header>
-        <button id="add-income-btn">Add Income</button>
-        <button id="add-expense-btn">Add Expense</button>
-        <table id="budget-table" class="center">
+        <!-- <div id="button-cont">
+            <button id="add-income-btn">Add Income</button>
+            <button id="add-expense-btn">Add Expense</button>
+        </div> -->
+        <table id="income-table" class="center">
             <thead>
+                <tr>
+                    <th colspan="2">Income</th>
+                    <th>
+                        <button id="add-income-btn">Add</button>
+                    </th>
+                </tr>
                 <tr>
                     <th>Description</th>
                     <th>Amount</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th colspan="2">Income</th>
-                </tr>
+            </tbody>
+        </table>
+        <table id="expense-table" class="center">
+            <thead>
                 <tr>
                     <th colspan="2">Expenses</th>
+                    <th>
+                        <button id="add-expense-btn">Add</button>
+                    </th>
                 </tr>
+                <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
             </tbody>
         </table>
     <div class="popup-form" id="income-form-cont">
