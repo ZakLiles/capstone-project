@@ -82,13 +82,16 @@ const showExpenseForm = () => {
 
 const addIncome = (event) => {
     event.preventDefault()
-    let desc = document.getElementById('income-desc').value
-    let amount = document.getElementById('income-amount').value
+    let desc = document.getElementById('income-desc')
+    let amount = document.getElementById('income-amount')
 
     let incomeObj = {
-        desc: desc,
-        amount: amount
+        desc: desc.value,
+        amount: amount.value
     }
+
+    desc.value = ''
+    amount.value = ''
 
     console.log("addIncome")
     axios.post('/income', incomeObj).then(()=> getIncome())
@@ -111,6 +114,9 @@ const addExpense = (event) => {
         amount: amount.value
     }
 
+    desc.value = ''
+    amount.value = ''
+    
     console.log("addExpense")
     axios.post('/expenses', expenseObj).then(()=> getExpenses())
     expenseFormCont.style.display = "none";
