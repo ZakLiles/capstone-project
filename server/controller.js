@@ -23,12 +23,12 @@ module.exports = {
         res.sendFile(path.join(__dirname, '../public/main.js'))
     },
     getIncome: (req, res) => {
-        sequelize.query(`SELECT * FROM income;`)
+        sequelize.query(`SELECT * FROM income ORDER BY income_id;`)
             .then(dbRes => res.status(200).send(dbRes[0]))
             .catch(err => console.log(err))
     },
     getExpenses: (req, res) => {
-        sequelize.query(`SELECT * FROM expenses;`)
+        sequelize.query(`SELECT * FROM expenses ORDER BY expense_id;`)
             .then(dbRes => res.status(200).send(dbRes[0]))
             .catch(err => console.log(err))
     },
@@ -61,6 +61,22 @@ module.exports = {
         console.log(req.params)
         let {id} = req.params
         sequelize.query(`DELETE FROM expenses WHERE expense_id=${id}`)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err))
+    },
+    editIncome: (req, res) => {
+        console.log("Editing Income DB Entry")
+        let {id} = req.params
+        let {desc, amount} = req.body
+        sequelize.query(`UPDATE income SET description = '${desc}', amount = ${amount} WHERE income_id=${id}`)
+        .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err))
+    },
+    editExpense: (req, res) => {
+        console.log("Editing Expense DB Entry")
+        let {id} = req.params
+        let {desc, amount} = req.body
+        sequelize.query(`UPDATE expenses SET description = '${desc}', amount = ${amount} WHERE expense_id=${id}`)
         .then(dbRes => res.status(200).send(dbRes[0]))
         .catch(err => console.log(err))
     }
