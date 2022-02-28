@@ -4,7 +4,7 @@ const express = require('express')
 const app = express()
 const port = process.env.PORT || process.env.SERVER_PORT
 
-const {getHTML, getStyles, getScript, getIncome, getExpenses, addIncome, addExpense, deleteIncome, deleteExpense, editIncome, editExpense} = require('./controller.js')
+const {getHTML, getStyles, getScript, getIncome, getExpenses, addIncome, addExpense, deleteIncome, deleteExpense, editIncome, editExpense, getTotalIncome, getTotalExpenses, getNetIncome} = require('./controller.js')
 
 app.use(express.json())
 
@@ -19,5 +19,8 @@ app.delete('/income/:id', deleteIncome)
 app.delete('/expense/:id', deleteExpense)
 app.put('/income/:id', editIncome)
 app.put('/expense/:id', editExpense)
+app.get('/total-income', getTotalIncome)
+app.get('/total-expenses', getTotalExpenses)
+app.get('/net-income', getNetIncome)
 
 app.listen(port, () => console.log(`Listening on port ${port}`))

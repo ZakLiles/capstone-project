@@ -24,23 +24,29 @@ const unBlurBackground = () => mask.style.display = "none"
 
 const incomeCallback = ({data: income}) => showIncome(income)
 const expensesCallback = ({data: expenses}) => showExpenses(expenses)
+const totalIncomeCallback = ({data: sum}) => showTotalIncome(sum)
+const totalExpenseCallback = ({data: sum}) => showTotalExpenses(sum)
+const netIncomeCallback = ({data: netIncome}) => showNetIncome(netIncome)
+
 const errCallback = err => console.log(err)
 
 const getTransactions = () => {
     getIncome()
     getExpenses()
+    calcTotalIncome()
+    calcTotalExpenses()
+    getNetIncome()
 }
 
-const getIncome = () => {
-    axios.get(`/income`).then(incomeCallback)
-}
-
-const getExpenses = () => {
-    axios.get('/expenses').then(expensesCallback)
-}
+const getIncome = () => axios.get(`/income`).then(incomeCallback).catch(errCallback)
+const getExpenses = () => axios.get('/expenses').then(expensesCallback).catch(errCallback)
+const calcTotalIncome = () => axios.get('/total-income').then(totalIncomeCallback).catch(errCallback)
+const calcTotalExpenses = () => axios.get('/total-expenses').then(totalExpenseCallback).catch(errCallback)
+const getNetIncome = () => axios.get('/net-income').then(netIncomeCallback).catch(errCallback)
 
 const showIncome = incomeArr => {
-    for(i = expenseTable.rows.length-1; i >= 0; i--){
+
+    for(i = incomeTable.rows.length-1; i >= 0; i--){
         incomeTable.deleteRow(i)
     }
 
@@ -53,17 +59,19 @@ const showIncome = incomeArr => {
             let desc = incomeArr[i].description
             let amount = incomeArr[i].amount
             descCell.innerHTML = desc
+            descCell.classList.add("align-middle")
             amountCell.innerHTML = '$' + amount
-            amountCell.classList.add("text-end")
+            amountCell.classList.add("text-end","align-middle")
             actionCell.classList.add("text-center")
             actionCell.innerHTML = `<button type="button" class="btn" onclick="editIncome(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class ="btn" onclick="deleteIncome(${id})"><i class="fa-solid fa-trash-can"></i></button>`
     }
+    calcTotalIncome()
+    getNetIncome()
 }
 
 const showExpenses = expensesArr => {
 
     for(i = expenseTable.rows.length-1; i >= 0; i--){
-        console.log("deleting row", i)
         expenseTable.deleteRow(i)
     }
 
@@ -76,10 +84,67 @@ const showExpenses = expensesArr => {
         let desc = expensesArr[i].description
         let amount = expensesArr[i].amount
         descCell.innerHTML = desc
+        descCell.classList.add("align-middle")
         amountCell.innerHTML = '-$' + amount
-        amountCell.classList.add("text-end", "text-danger")
+        amountCell.classList.add("text-end", "text-danger", "align-middle")
         actionCell.classList.add("text-center")
-        actionCell.innerHTML = `<button type="button" class="btn" onclick="editExpense(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class ="btn" onclick="deleteExpense(${id})"><i class="fa-solid fa-trash-can"></i></button>`
+        actionCell.innerHTML = `<button type="button" class="btn" onclick="editExpense(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class = "btn" onclick="deleteExpense(${id})"><i class="fa-solid fa-trash-can"></i></button>`
+    }
+    calcTotalExpenses()
+    getNetIncome()
+}
+
+const showTotalIncome = totalIncome => {
+    const totalIncomes = document.querySelectorAll(".total-income")
+    totalIncomes.forEach((tI) =>  {
+        if(totalIncome.sum){
+            tI.innerHTML="$"+totalIncome.sum
+        } else {
+            tI.innerHTML="-"
+        }
+    })
+}
+
+const showTotalExpenses = totalExpenses => {
+    const totalExpensesItems = document.querySelectorAll(".total-expenses")
+    totalExpensesItems.forEach((tE) => {
+        if(totalExpenses.sum){
+            tE.innerHTML="-$"+totalExpenses.sum
+        } else {
+            tE.innerHTML="-"
+        }
+    })
+}
+
+const showNetIncome = netIncomeObj => {
+    let netIncomeElem = document.getElementById('net-income')
+    let netIncome = netIncomeObj.netincome
+
+    if(!netIncome) {
+        if (netIncomeObj.totalincome) {
+            netIncome = netIncomeObj.totalincome
+        } else if (netIncomeObj.totalexpenses) {
+            netIncome = -netIncomeObj.totalexpenses
+        } else {
+            netIncome = 0
+        }
+    }
+
+    if(netIncome > 0){
+         if(netIncomeElem.classList.contains('text-danger')){
+            netIncomeElem.classList.remove('text-danger')
+         }
+         netIncomeElem.innerHTML = "$" + netIncome
+    } else if (netIncome < 0){
+        if(!netIncomeElem.classList.contains('text-danger')){
+            netIncomeElem.classList.add('text-danger')
+        }
+        netIncomeElem.innerHTML = "-$" + netIncome*-1
+    } else {
+        if(netIncomeElem.classList.contains('text-danger')){
+            netIncomeElem.classList.remove('text-danger')
+         }
+         netIncomeElem.innerHTML = "-"
     }
 }
 
@@ -147,12 +212,10 @@ const deleteIncome = id => {
 }
 
 const deleteExpense = id => {
-    console.log('deleteExpense', id)
     axios.delete(`/expense/${id}`).then(() => getExpenses())
 }
 
 const editIncome = (id, desc, amount) => {
-    console.log(`Id: ${id} Desc: ${desc} Amount: ${amount}`)
     editIncomeFormBtn.dataset.id = id;
     editIncomeFormBtn.style.display = "inline-block";
     addIncomeFormBtn.style.display = "none";
@@ -162,7 +225,6 @@ const editIncome = (id, desc, amount) => {
 }
 
 const editExpense = (id, desc, amount) => {
-    console.log(`Id: ${id} Desc: ${desc} Amount: ${amount}`)
     editExpenseFormBtn.dataset.id = id;
     editExpenseFormBtn.style.display = "inline-block";
     addExpenseFormBtn.style.display = "none";
@@ -185,7 +247,6 @@ const saveIncomeEdit = (event) => {
     desc.value = ''
     amount.value = ''
 
-    console.log("SaveEditIncome")
     axios.put(`/income/${id}`, incomeObj).then(()=> getIncome())
     incomeFormCont.style.display = "none";
     editIncomeFormBtn.style.display = "none";
@@ -207,13 +268,14 @@ const saveExpenseEdit = (event) => {
     desc.value = ''
     amount.value = ''
     
-    console.log("SaveEditExpense")
     axios.put(`/expense/${id}`, expenseObj).then(()=> getExpenses())
     expenseFormCont.style.display = "none";
     editExpenseFormBtn.style.display = "none";
     addExpenseFormBtn.style.display = "inline-block";
     unBlurBackground()
 }
+
+
 
 addIncomeBtn.addEventListener('click', showIncomeForm)
 addExpenseBtn.addEventListener('click', showExpenseForm)
