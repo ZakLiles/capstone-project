@@ -4,23 +4,19 @@ const addExpenseBtn = document.getElementById("add-expense-btn");
 const incomeTable = document.getElementById("income-table").tBodies[0]
 const expenseTable = document.getElementById("expense-table").tBodies[0]
 
-const incomeFormCont = document.getElementById("income-form-cont");
+const incomeFormCont = document.getElementById("incomeFormCont");
 const incomeForm = document.getElementById("income-form");
 const addIncomeFormBtn = document.getElementById("add-income-btn-popup");
 const editIncomeFormBtn = document.getElementById("edit-income-btn");
 const cancelIncomeFormBtn = document.getElementById("cancel-income-btn-popup");
+const incomeModalTitle = document.getElementById("incomeModalTitle");
 
-const expenseFormCont = document.getElementById("expense-form-cont");
+const expenseFormCont = document.getElementById("expenseFormCont");
 const expenseForm = document.getElementById("expense-form");
 const addExpenseFormBtn = document.getElementById("add-expense-btn-popup");
 const editExpenseFormBtn = document.getElementById("edit-expense-btn");
 const cancelExpenseFormBtn = document.getElementById("cancel-expense-btn-popup");
-
-const mask = document.getElementById("mask");
-
-const blurBackground = () => mask.style.display = "block"
-const unBlurBackground = () => mask.style.display = "none"
-
+const expenseModalTitle = document.getElementById("expenseModalTitle");
 
 const incomeCallback = ({data: income}) => showIncome(income)
 const expensesCallback = ({data: expenses}) => showExpenses(expenses)
@@ -37,6 +33,11 @@ const getTransactions = () => {
     calcTotalExpenses()
     getNetIncome()
 }
+
+const tooltipTriggerList = [].slice.call(document.querySelectorAll('tt'))
+const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+  return new bootstrap.Tooltip(tooltipTriggerEl)
+})
 
 const getIncome = () => axios.get(`/income`).then(incomeCallback).catch(errCallback)
 const getExpenses = () => axios.get('/expenses').then(expensesCallback).catch(errCallback)
@@ -63,7 +64,7 @@ const showIncome = incomeArr => {
             amountCell.innerHTML = '$' + amount
             amountCell.classList.add("text-end","align-middle")
             actionCell.classList.add("text-center")
-            actionCell.innerHTML = `<button type="button" class="btn" onclick="editIncome(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class ="btn" onclick="deleteIncome(${id})"><i class="fa-solid fa-trash-can"></i></button>`
+            actionCell.innerHTML = `<button type="button" class="btn tt" data-bs-placement="left" title="Edit" data-bs-toggle="modal" data-bs-target="#incomeFormCont" onclick="editIncome(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class ="btn tt" data-bs-placement="top" title="Delete" onclick="deleteIncome(${id})"><i class="fa-solid fa-trash-can"></i></button>`
     }
     calcTotalIncome()
     getNetIncome()
@@ -88,7 +89,7 @@ const showExpenses = expensesArr => {
         amountCell.innerHTML = '-$' + amount
         amountCell.classList.add("text-end", "text-danger", "align-middle")
         actionCell.classList.add("text-center")
-        actionCell.innerHTML = `<button type="button" class="btn" onclick="editExpense(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class = "btn" onclick="deleteExpense(${id})"><i class="fa-solid fa-trash-can"></i></button>`
+        actionCell.innerHTML = `<button type="button" class="btn tt" data-bs-placement="left" title="Edit" data-bs-toggle="modal" data-bs-target="#expenseFormCont" onclick="editExpense(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class="btn tt" data-bs-placement="top" title="Delete" onclick="deleteExpense(${id})"><i class="fa-solid fa-trash-can"></i></button>`
     }
     calcTotalExpenses()
     getNetIncome()
@@ -149,17 +150,20 @@ const showNetIncome = netIncomeObj => {
 }
 
 const showIncomeForm = () => {
-    incomeFormCont.style.display = "block";
-    blurBackground()
+    incomeModalTitle.innerHTML ="Add Income";
+    editIncomeFormBtn.style.display = "none";
+    addIncomeFormBtn.style.display = "inline-block";
 }
 
 const showExpenseForm = () => {
-    expenseFormCont.style.display = "block";
-    blurBackground()
+    expenseModalTitle.innerHTML ="Add Expense";
+    editExpenseFormBtn.style.display = "none";
+    addExpenseFormBtn.style.display = "inline-block";
 }
 
 const addIncome = (event) => {
     event.preventDefault()
+
     let desc = document.getElementById('income-desc')
     let amount = document.getElementById('income-amount')
 
@@ -171,16 +175,13 @@ const addIncome = (event) => {
     desc.value = ''
     amount.value = ''
 
-    console.log("addIncome")
     axios.post('/income', incomeObj).then(()=> getIncome())
-    incomeFormCont.style.display = "none";
-    unBlurBackground()
+    // incomeFormCont.style.display = "none";
 }
 
-const cancelIncome = (event) => {
-    incomeFormCont.style.display = "none";
-    unBlurBackground()
-}
+// const cancelIncome = (event) => {
+//     incomeFormCont.style.display = "none";
+// }
 
 const addExpense = (event) => {
     event.preventDefault()
@@ -195,19 +196,15 @@ const addExpense = (event) => {
     desc.value = ''
     amount.value = ''
     
-    console.log("addExpense")
     axios.post('/expenses', expenseObj).then(()=> getExpenses())
-    expenseFormCont.style.display = "none";
-    unBlurBackground()
+    // expenseFormCont.style.display = "none";
 }
 
-const cancelExpense = (event) => {
-    expenseFormCont.style.display = "none";
-    unBlurBackground()
-}
+// const cancelExpense = (event) => {
+//     expenseFormCont.style.display = "none";
+// }
 
 const deleteIncome = id => {
-    console.log('deleteIncome', id)
     axios.delete(`/income/${id}`).then(() => getIncome())
 }
 
@@ -216,19 +213,19 @@ const deleteExpense = id => {
 }
 
 const editIncome = (id, desc, amount) => {
+    incomeModalTitle.innerHTML ="Edit Income";
     editIncomeFormBtn.dataset.id = id;
     editIncomeFormBtn.style.display = "inline-block";
     addIncomeFormBtn.style.display = "none";
-    showIncomeForm()
     document.getElementById('income-desc').value = desc
     document.getElementById('income-amount').value = amount
 }
 
 const editExpense = (id, desc, amount) => {
+    expenseModalTitle.innerHTML ="Edit Expense";
     editExpenseFormBtn.dataset.id = id;
     editExpenseFormBtn.style.display = "inline-block";
     addExpenseFormBtn.style.display = "none";
-    showExpenseForm()
     document.getElementById('expense-desc').value = desc
     document.getElementById('expense-amount').value = amount
 }
@@ -248,10 +245,9 @@ const saveIncomeEdit = (event) => {
     amount.value = ''
 
     axios.put(`/income/${id}`, incomeObj).then(()=> getIncome())
-    incomeFormCont.style.display = "none";
+    // incomeFormCont.style.display = "none";
     editIncomeFormBtn.style.display = "none";
     addIncomeFormBtn.style.display = "inline-block";
-    unBlurBackground()
 }
 
 const saveExpenseEdit = (event) => {
@@ -269,20 +265,15 @@ const saveExpenseEdit = (event) => {
     amount.value = ''
     
     axios.put(`/expense/${id}`, expenseObj).then(()=> getExpenses())
-    expenseFormCont.style.display = "none";
+    // expenseFormCont.style.display = "none";
     editExpenseFormBtn.style.display = "none";
     addExpenseFormBtn.style.display = "inline-block";
-    unBlurBackground()
 }
-
-
 
 addIncomeBtn.addEventListener('click', showIncomeForm)
 addExpenseBtn.addEventListener('click', showExpenseForm)
 incomeForm.addEventListener('submit', addIncome)
-incomeForm.addEventListener('reset', cancelIncome)
 expenseForm.addEventListener('submit', addExpense)
-expenseForm.addEventListener('reset', cancelExpense)
 editIncomeFormBtn.addEventListener('click', saveIncomeEdit)
 editExpenseFormBtn.addEventListener('click', saveExpenseEdit)
 

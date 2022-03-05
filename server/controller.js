@@ -22,6 +22,9 @@ module.exports = {
     getScript: (req, res) => {
         res.sendFile(path.join(__dirname, '../public/main.js'))
     },
+    getFavicon: (req, res) => {
+        res.sendFile(path.join(__dirname, '../public/favicon-32x32.png'))
+    },
     getIncome: (req, res) => {
         sequelize.query(`SELECT * FROM income ORDER BY income_id;`)
             .then(dbRes => res.status(200).send(dbRes[0]))
