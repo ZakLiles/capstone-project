@@ -18,6 +18,8 @@ const editExpenseFormBtn = document.getElementById("edit-expense-btn");
 const cancelExpenseFormBtn = document.getElementById("cancel-expense-btn-popup");
 const expenseModalTitle = document.getElementById("expenseModalTitle");
 
+const graphBtn = document.getElementById('graph-btn');
+
 const incomeCallback = ({data: income}) => showIncome(income)
 const expensesCallback = ({data: expenses}) => showExpenses(expenses)
 const totalIncomeCallback = ({data: sum}) => showTotalIncome(sum)
@@ -176,12 +178,7 @@ const addIncome = (event) => {
     amount.value = ''
 
     axios.post('/income', incomeObj).then(()=> getIncome())
-    // incomeFormCont.style.display = "none";
 }
-
-// const cancelIncome = (event) => {
-//     incomeFormCont.style.display = "none";
-// }
 
 const addExpense = (event) => {
     event.preventDefault()
@@ -197,12 +194,7 @@ const addExpense = (event) => {
     amount.value = ''
     
     axios.post('/expenses', expenseObj).then(()=> getExpenses())
-    // expenseFormCont.style.display = "none";
 }
-
-// const cancelExpense = (event) => {
-//     expenseFormCont.style.display = "none";
-// }
 
 const deleteIncome = id => {
     axios.delete(`/income/${id}`).then(() => getIncome())
@@ -245,7 +237,6 @@ const saveIncomeEdit = (event) => {
     amount.value = ''
 
     axios.put(`/income/${id}`, incomeObj).then(()=> getIncome())
-    // incomeFormCont.style.display = "none";
     editIncomeFormBtn.style.display = "none";
     addIncomeFormBtn.style.display = "inline-block";
 }
@@ -265,9 +256,113 @@ const saveExpenseEdit = (event) => {
     amount.value = ''
     
     axios.put(`/expense/${id}`, expenseObj).then(()=> getExpenses())
-    // expenseFormCont.style.display = "none";
     editExpenseFormBtn.style.display = "none";
     addExpenseFormBtn.style.display = "inline-block";
+}
+
+const spendingGraph = () => {
+
+    axios.all([axios.get('/expenses'),axios.get('/total-income'),axios.get('/total-expenses')]).then(axios.spread((...responses) => {
+        const expenses = responses[0].data
+        const totalIncome = responses[1].data.sum
+        const totalExpenses = responses[2].data.sum
+
+        const expensesDesc = []
+        const expensesPerc = []
+
+        if(totalExpenses < totalIncome){
+            expenses.forEach((expense) => {
+                let amount = expense.amount
+                let desc = expense.description
+                expensesDesc.push(desc)
+                expensesPerc.push(amount)
+            })
+            expensesDesc.push('Remainder')
+            expensesPerc.push(totalIncome-totalExpenses)
+        } else {
+            expenses.forEach((expense) => {
+                let amount = expense.amount
+                let desc = expense.description
+                expensesDesc.push(desc)
+                expensesPerc.push(amount)
+            })
+        }
+
+        const colorScale = d3.interpolateRainbow
+
+        const colorRangeInfo = {
+            colorStart: 0,
+            colorEnd: 1,
+            useEndAsStart: true
+        }
+        const chartData = {
+            labels: expensesDesc,
+            data: expensesPerc
+        }
+        drawPieChart('spendingChart', chartData, colorScale, colorRangeInfo)
+    }))
+
+}
+
+const calculatePoint = (i, intervalSize, colorRangeInfo) => {
+    let { colorStart, colorEnd, useEndAsStart } = colorRangeInfo;
+    return (useEndAsStart
+      ? (colorEnd - (i * intervalSize))
+      : (colorStart + (i * intervalSize)));
+}
+
+const interpolateColors = (dataLength, colorScale, colorRangeInfo) => {
+    let { colorStart, colorEnd } = colorRangeInfo;
+    let colorRange = colorEnd - colorStart;
+    let intervalSize = colorRange / dataLength;
+    let i, colorPoint;
+    let colorArray = [];
+  
+    for (i = 0; i < dataLength; i++) {
+      colorPoint = calculatePoint(i, intervalSize, colorRangeInfo);
+      colorArray.push(colorScale(colorPoint));
+    }
+  
+    return colorArray;
+}  
+
+function drawPieChart(chartId, chartData, colorScale, colorRangeInfo) {
+    /* Grab chart element by id */
+    const chartElement = document.getElementById(chartId);
+  
+    const dataLength = chartData.data.length;
+  
+    /* Create color array */
+    var COLORS = interpolateColors(dataLength, colorScale, colorRangeInfo);
+  
+  
+    /* Create chart */
+    const myChart = new Chart(chartElement, {
+      type: 'pie',
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          {
+            backgroundColor: COLORS,
+            hoverBackgroundColor: COLORS,
+            data: chartData.data
+          }
+        ],
+      },
+    //   options: {
+    //     responsive: true,
+    //     legend: {
+    //       display: true,
+    //     },
+    //     hover: {
+    //       onHover: function(e) {
+    //         var point = this.getElementAtEvent(e);
+    //         e.target.style.cursor = point.length ? 'pointer' : 'default';
+    //       },
+    //     },
+    //   }
+    });
+  
 }
 
 addIncomeBtn.addEventListener('click', showIncomeForm)
@@ -276,5 +371,6 @@ incomeForm.addEventListener('submit', addIncome)
 expenseForm.addEventListener('submit', addExpense)
 editIncomeFormBtn.addEventListener('click', saveIncomeEdit)
 editExpenseFormBtn.addEventListener('click', saveExpenseEdit)
+graphBtn.addEventListener('click', spendingGraph)
 
 getTransactions()

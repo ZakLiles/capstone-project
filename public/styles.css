@@ -1,24 +1,7 @@
-header {
-    text-align: center;
-}
+ header {
+    height: 10vh;
+} 
 
-.center {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.save {
-    display: none;
-}
-.container-sm {
-    max-width: 50%;
-}
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-}
-
-.modal-footer > button {
-    width: 80px;
-    margin-left: 15px;
-}
+/* #bodyContainer {
+    height: 90%;
+} */
