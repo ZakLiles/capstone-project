@@ -19,6 +19,7 @@ const cancelExpenseFormBtn = document.getElementById("cancel-expense-btn-popup")
 const expenseModalTitle = document.getElementById("expenseModalTitle");
 
 const graphBtn = document.getElementById('graph-btn');
+const graphModal = document.getElementById('graphCont');
 
 const incomeCallback = ({data: income}) => showIncome(income)
 const expensesCallback = ({data: expenses}) => showExpenses(expenses)
@@ -337,9 +338,6 @@ function drawPieChart(chartId, chartData, colorScale, colorRangeInfo) {
     /* Create color array */
     var COLORS = interpolateColors(dataLength, colorScale, colorRangeInfo);
   
-    if(myChart != undefined) {
-        myChart.destroy()
-    }
 
     /* Create chart */
     window.myChart = new Chart(chartElement, {
@@ -358,6 +356,13 @@ function drawPieChart(chartId, chartData, colorScale, colorRangeInfo) {
   
 }
 
+const destroyChart = (event) => {
+    if(myChart){
+        myChart.destroy()
+        console.log("Chart Destroyed - Take that you pesky chart")
+    }
+
+}
 addIncomeBtn.addEventListener('click', showIncomeForm)
 addExpenseBtn.addEventListener('click', showExpenseForm)
 incomeForm.addEventListener('submit', addIncome)
@@ -365,5 +370,6 @@ expenseForm.addEventListener('submit', addExpense)
 editIncomeFormBtn.addEventListener('click', saveIncomeEdit)
 editExpenseFormBtn.addEventListener('click', saveExpenseEdit)
 graphBtn.addEventListener('click', spendingGraph)
+graphModal.addEventListener('hidden.bs.modal', destroyChart)
 
 getTransactions()
