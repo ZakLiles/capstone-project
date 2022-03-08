@@ -165,35 +165,45 @@ const showExpenseForm = () => {
 
 const addIncome = (event) => {
     event.preventDefault()
+    console.log("add Income called")
+    if(addIncomeFormBtn.style.display === "none") {
+        saveIncomeEdit(event)
+    } else {
+        let desc = document.getElementById('income-desc')
+        let amount = document.getElementById('income-amount')
+    
+        let incomeObj = {
+            desc: desc.value,
+            amount: amount.value
+        }
+    
+        desc.value = ''
+        amount.value = ''
+    
+        axios.post('/income', incomeObj).then(()=> getIncome())
 
-    let desc = document.getElementById('income-desc')
-    let amount = document.getElementById('income-amount')
-
-    let incomeObj = {
-        desc: desc.value,
-        amount: amount.value
     }
-
-    desc.value = ''
-    amount.value = ''
-
-    axios.post('/income', incomeObj).then(()=> getIncome())
 }
 
 const addExpense = (event) => {
     event.preventDefault()
-    let desc = document.getElementById('expense-desc')
-    let amount = document.getElementById('expense-amount')
 
-    let expenseObj = {
-        desc: desc.value,
-        amount: amount.value
-    }
-
-    desc.value = ''
-    amount.value = ''
+    if(addExpenseFormBtn.style.display === "none"){
+        saveExpenseEdit(event)
+    } else {
+        let desc = document.getElementById('expense-desc')
+        let amount = document.getElementById('expense-amount')
     
-    axios.post('/expenses', expenseObj).then(()=> getExpenses())
+        let expenseObj = {
+            desc: desc.value,
+            amount: amount.value
+        }
+    
+        desc.value = ''
+        amount.value = ''
+        
+        axios.post('/expenses', expenseObj).then(()=> getExpenses())
+    }
 }
 
 const deleteIncome = id => {
