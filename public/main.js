@@ -66,7 +66,7 @@ const showIncome = incomeArr => {
             amountCell.innerHTML = '$' + amount
             amountCell.classList.add("text-end","align-middle")
             actionCell.classList.add("text-center")
-            actionCell.innerHTML = `<button type="button" class="btn tt" data-bs-placement="left" title="Edit" data-bs-toggle="modal" data-bs-target="#incomeFormCont" onclick="editIncome(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class ="btn tt" data-bs-placement="top" title="Delete" onclick="deleteIncome(${id})"><i class="fa-solid fa-trash-can"></i></button>`
+            actionCell.innerHTML = `<button type="button" class="btn tt" data-bs-placement="left" title="Edit" data-bs-toggle="modal" data-bs-target="#incomeFormCont" onclick="editIncome(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square fa-ms"></i></button><button type="button" class ="btn tt" data-bs-placement="top" title="Delete" onclick="deleteIncome(${id})"><i class="fa-solid fa-trash-can fa-sm"></i></button>`
     }
     calcTotalIncome()
     getNetIncome()
@@ -91,7 +91,7 @@ const showExpenses = expensesArr => {
         amountCell.innerHTML = '-$' + amount
         amountCell.classList.add("text-end", "text-danger", "align-middle")
         actionCell.classList.add("text-center")
-        actionCell.innerHTML = `<button type="button" class="btn tt" data-bs-placement="left" title="Edit" data-bs-toggle="modal" data-bs-target="#expenseFormCont" onclick="editExpense(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square"></i></button><button type="button" class="btn tt" data-bs-placement="top" title="Delete" onclick="deleteExpense(${id})"><i class="fa-solid fa-trash-can"></i></button>`
+        actionCell.innerHTML = `<button type="button" class="btn tt" data-bs-placement="left" title="Edit" data-bs-toggle="modal" data-bs-target="#expenseFormCont" onclick="editExpense(${id}, '${desc}', ${amount})"><i class="fa-solid fa-pen-to-square fa-sm"></i></button><button type="button" class="btn tt" data-bs-placement="top" title="Delete" onclick="deleteExpense(${id})"><i class="fa-solid fa-trash-can fa-sm"></i></button>`
     }
     calcTotalExpenses()
     getNetIncome()
@@ -262,7 +262,7 @@ const saveExpenseEdit = (event) => {
 
 const spendingGraph = () => {
 
-    axios.all([axios.get('/expenses'),axios.get('/total-income'),axios.get('/total-expenses')]).then(axios.spread((...responses) => {
+    axios.all([axios.get('/expenses'), axios.get('/total-income'), axios.get('/total-expenses')]).then(axios.spread((...responses) => {
         const expenses = responses[0].data
         const totalIncome = responses[1].data.sum
         const totalExpenses = responses[2].data.sum
@@ -270,23 +270,17 @@ const spendingGraph = () => {
         const expensesDesc = []
         const expensesPerc = []
 
+        expenses.forEach((expense) => {
+            let amount = expense.amount
+            let desc = expense.description
+            expensesDesc.push(desc)
+            expensesPerc.push(amount)
+        })
+        
         if(totalExpenses < totalIncome){
-            expenses.forEach((expense) => {
-                let amount = expense.amount
-                let desc = expense.description
-                expensesDesc.push(desc)
-                expensesPerc.push(amount)
-            })
             expensesDesc.push('Remainder')
-            expensesPerc.push(totalIncome-totalExpenses)
-        } else {
-            expenses.forEach((expense) => {
-                let amount = expense.amount
-                let desc = expense.description
-                expensesDesc.push(desc)
-                expensesPerc.push(amount)
-            })
-        }
+            expensesPerc.push(totalIncome-totalExpenses)       
+        } 
 
         const colorScale = d3.interpolateRainbow
 
@@ -305,21 +299,19 @@ const spendingGraph = () => {
 }
 
 const calculatePoint = (i, intervalSize, colorRangeInfo) => {
-    let { colorStart, colorEnd, useEndAsStart } = colorRangeInfo;
-    return (useEndAsStart
-      ? (colorEnd - (i * intervalSize))
-      : (colorStart + (i * intervalSize)));
+    let { colorStart, colorEnd, useEndAsStart } = colorRangeInfo
+    return (useEndAsStart ? (colorEnd - (i * intervalSize)) : (colorStart + (i * intervalSize)));
 }
 
 const interpolateColors = (dataLength, colorScale, colorRangeInfo) => {
     let { colorStart, colorEnd } = colorRangeInfo;
     let colorRange = colorEnd - colorStart;
     let intervalSize = colorRange / dataLength;
-    let i, colorPoint;
+
     let colorArray = [];
   
-    for (i = 0; i < dataLength; i++) {
-      colorPoint = calculatePoint(i, intervalSize, colorRangeInfo);
+    for (let i = 0; i < dataLength; i++) {
+      let colorPoint = calculatePoint(i, intervalSize, colorRangeInfo);
       colorArray.push(colorScale(colorPoint));
     }
   
@@ -348,19 +340,7 @@ function drawPieChart(chartId, chartData, colorScale, colorRangeInfo) {
             data: chartData.data
           }
         ],
-      },
-    //   options: {
-    //     responsive: true,
-    //     legend: {
-    //       display: true,
-    //     },
-    //     hover: {
-    //       onHover: function(e) {
-    //         var point = this.getElementAtEvent(e);
-    //         e.target.style.cursor = point.length ? 'pointer' : 'default';
-    //       },
-    //     },
-    //   }
+      }
     });
   
 }
