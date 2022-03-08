@@ -337,10 +337,10 @@ function drawPieChart(chartId, chartData, colorScale, colorRangeInfo) {
     /* Create color array */
     var COLORS = interpolateColors(dataLength, colorScale, colorRangeInfo);
   
-    if(myChart) {
-        myChart.destroy()
-    }
-    
+    // if(myChart) {
+    //     myChart.destroy()
+    // }
+
     /* Create chart */
     const myChart = new Chart(chartElement, {
       type: 'pie',
