@@ -342,7 +342,7 @@ function drawPieChart(chartId, chartData, colorScale, colorRangeInfo) {
     }
 
     /* Create chart */
-    const myChart = new Chart(chartElement, {
+    window.myChart = new Chart(chartElement, {
       type: 'pie',
       data: {
         labels: chartData.labels,
