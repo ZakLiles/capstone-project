@@ -363,6 +363,21 @@ const destroyChart = (event) => {
     }
 
 }
+
+const clearIncome = (event) => {
+
+    document.getElementById('income-desc').value = ''
+    document.getElementById('income-amount').value = ''
+
+}
+
+const clearExpense = (event) => {
+ 
+    document.getElementById('expense-desc').value = ''
+    document.getElementById('expense-amount').value = ''
+    
+}
+
 addIncomeBtn.addEventListener('click', showIncomeForm)
 addExpenseBtn.addEventListener('click', showExpenseForm)
 incomeForm.addEventListener('submit', addIncome)
@@ -371,5 +386,7 @@ editIncomeFormBtn.addEventListener('click', saveIncomeEdit)
 editExpenseFormBtn.addEventListener('click', saveExpenseEdit)
 graphBtn.addEventListener('click', spendingGraph)
 graphModal.addEventListener('hidden.bs.modal', destroyChart)
+incomeFormCont.addEventListener('hidden.bs.modal', clearIncome)
+expenseFormCont.addEventListener('hidden.bs.modal', clearExpense)
 
 getTransactions()
