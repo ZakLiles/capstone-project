@@ -1,0 +1,11 @@
+Budgeting App Features
+
+MVP
+1. User can post new transactions (income/expenses) [POST request]
+2. User can get see previous entered transactions [GET request]
+3. User can delete previous transactions [DELETE request]
+
+Additional Features
+4. User can edit previous transactions [PUT request]
+5. Net income calculated and displayed to user
+6. Spending Summary displayed to user via graph (pie chart)
